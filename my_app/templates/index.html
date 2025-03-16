@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IBM Financial Analysis Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Existing styles */
+    :root {
+      --ibm-blue: #0f62fe;
+      --ibm-blue-light: #d0e2ff;
+      --ibm-gray-10: #f4f4f4;
+      --ibm-gray-20: #e0e0e0;
+      --ibm-gray-100: #161616;
+      --ibm-white: #ffffff;
+    }
+
+    /* Add header styles for the logo */
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: -3rem;
+    }
+
+    .ibm-logo {
+      height: 36px; /* Adjust size as needed */
+      margin-right: 1.5rem;
+    }
+
+    /* Add style for the horizontal line under the title */
+    .title-separator {
+      border: 0;
+      height: 1px;
+      background-color: var(--ibm-gray-20);
+      margin-top: 2rem;
+      width: 100%;
+    }
+
+    /* Style for the new static text area */
+    .static-text-area {
+      background-color: var(--ibm-gray-10);
+      border-bottom: 1px solid var(--ibm-gray-20);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      margin-left: 2rem;  /* Increase left margin */
+      margin-right: 2rem; /* Increase right margin */
+      font-family: 'IBM Plex Sans', sans-serif;
+      white-space: pre-wrap;
+      font-size: 1.25rem; /* Larger font size */
+      color: #000;       /* Black font color */
+    }
+
+    /* Existing styles continue... */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      line-height: 1.5;
+      color: var(--ibm-gray-100);
+      background-color: var(--ibm-gray-10);
+      padding: 2rem;
+    }
+
+    /* Container occupies 60% of the width and aligns left */
+    .container {
+      width: 100%;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      text-align: center;
+      color: var(--ibm-gray-100);
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--ibm-blue);
+      margin-bottom: 1rem;
+    }
+
+    .section {
+      background-color: var(--ibm-white);
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .section:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    p {
+      color: var(--ibm-gray-100);
+      margin-bottom: 1rem;
+    }
+
+    .analysis-content {
+      min-height: 100px;
+    }
+
+    .loading-placeholder {
+      color: #666;
+      font-style: italic;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      background-color: var(--ibm-gray-10);
+      padding: 1rem;
+      border-radius: 4px;
+      overflow: auto;
+    }
+
+    .section.updating {
+      background-color: var(--ibm-blue-light);
+    }
+
+    .analysis-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .analysis-status {
+      font-size: 0.85rem;
+      color: #666;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      background-color: var(--ibm-gray-20);
+    }
+
+    .updated {
+      animation: fadeHighlight 2s ease;
+    }
+
+    @keyframes fadeHighlight {
+      0% { background-color: var(--ibm-blue-light); }
+      100% { background-color: var(--ibm-white); }
+    }
+
+    /* New two-column layout for analysis content */
+    .analysis-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    
+    .analysis-text {
+      flex: 0 0 60%;
+      padding-right: 1rem;
+    }
+    
+    .analysis-images {
+      flex: 0 0 40%;
+      border-left: 1px solid var(--ibm-gray-20);
+      padding-left: 1rem;
+    }
+    
+    .image-placeholder {
+      font-style: italic;
+      color: #666;
+    }
+
+    /* Hide text content for MOST, SWOT, PESTLE sections */
+    #most .analysis-text, 
+    #swot .analysis-text, 
+    #pestle .analysis-text {
+      display: none;
+    }
+    
+    /* Hide images for Additional section */
+    #additional .analysis-images {
+      display: none;
+    }
+    
+    /* Make images take full width in MOST, SWOT, PESTLE sections */
+    #most .analysis-images,
+    #swot .analysis-images,
+    #pestle .analysis-images {
+      flex: 0 0 100%;
+      border-left: none;
+      padding-left: 0;
+    }
+    
+    /* Make text take full width in Additional section */
+    #additional .analysis-text {
+      flex: 0 0 100%;
+      padding-right: 0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .section {
+        padding: 1rem;
+      }
+      
+      .container {
+        width: 100%;
+      }
+      
+      #watson-chat {
+        width: 100%;
+        right: 0;
+        bottom: 0;
+        border-radius: 4px 4px 0 0;
+      }
+      
+      .analysis-wrapper {
+        flex-direction: column;
+      }
+      
+      .analysis-text,
+      .analysis-images {
+        flex: 1 0 100%;
+        padding: 0;
+      }
+      
+      .analysis-images {
+        border-left: none;
+        border-top: 1px solid var(--ibm-gray-20);
+        padding-top: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Add the header section with logo -->
+    <div class="header">
+      <img src="static/images/ibm-logo.webp" alt="IBM Logo" class="ibm-logo">
+      <h1>Financial Analysis Assistant</h1>
+    </div>
+
+    <!-- Add horizontal line under the title -->
+    <hr class="title-separator">
+
+    <!-- Static Text Area - Content here will not be modified by JavaScript functions -->
+    <div class="static-text-area">
+      Our platform provides AI-powered analysis of company annual reports, offering insights through SWOT, MOST, PESTLE, sentiment analysis, and word cloud visualizations. To begin, please interact with our chatbot in the lower right corner to upload your PDF. The chatbot will guide you through the process and answer any specific questions you may have.
+   </div>
+
+    <!-- MOST Analysis Section -->
+    <div class="section" id="most">
+      <div class="analysis-header">
+        <h2>MOST Analysis</h2>
+        <span class="analysis-status">Waiting for input</span>
+      </div>
+      <div class="analysis-wrapper">
+        <div class="analysis-text">
+          <div class="analysis-content">
+            <p class="loading-placeholder">
+                MOST analysis is a strategic planning framework used to align an organization's goals and actions. It consists of four elements: Mission (the overall purpose), Objectives (specific goals to achieve the mission), Strategy (high-level approaches to reach the objectives), and Tactics (detailed actions to implement the strategy). This method ensures that all activities contribute to the organization's long-term vision, improving efficiency and decision-making. MOST analysis is particularly useful for businesses undergoing transformation, as it helps define clear priorities and maintain strategic alignment across different levels of the organization.
+            </p>
+          </div>
+        </div>
+        <div class="analysis-images">
+          <p class="image-placeholder">
+            MOST analysis is a strategic planning framework used to align an organization's goals and actions. It consists of four elements: Mission (the overall purpose), Objectives (specific goals to achieve the mission), Strategy (high-level approaches to reach the objectives), and Tactics (detailed actions to implement the strategy). This method ensures that all activities contribute to the organization's long-term vision, improving efficiency and decision-making. MOST analysis is particularly useful for businesses undergoing transformation, as it helps define clear priorities and maintain strategic alignment across different levels of the organization.
+          </p>
+          </div>
+      </div>
+    </div>
+
+    <!-- SWOT Analysis Section -->
+    <div class="section" id="swot">
+      <div class="analysis-header">
+        <h2>SWOT Analysis</h2>
+        <span class="analysis-status">Waiting for input</span>
+      </div>
+      <div class="analysis-wrapper">
+        <div class="analysis-text">
+          <div class="analysis-content">
+            <p class="loading-placeholder">
+                SWOT analysis is a strategic tool used to assess an organization's Strengths, Weaknesses, Opportunities, and Threats. Strengths and weaknesses are internal factors, such as resources, expertise, or inefficiencies, while opportunities and threats arise from external influences like market trends and competition. By systematically analyzing these aspects, businesses can identify competitive advantages, mitigate risks, and develop informed strategies. SWOT analysis is widely used in business planning, marketing, and project management to help organizations capitalize on opportunities and address vulnerabilities effectively.
+            </p>
+          </div>
+        </div>
+        <div class="analysis-images">
+          <p class="image-placeholder">
+            SWOT analysis is a strategic tool used to assess an organization’s Strengths, Weaknesses, Opportunities, and Threats. Strengths and weaknesses are internal factors, such as resources, expertise, or inefficiencies, while opportunities and threats arise from external influences like market trends and competition. By systematically analyzing these aspects, businesses can identify competitive advantages, mitigate risks, and develop informed strategies. SWOT analysis is widely used in business planning, marketing, and project management to help organizations capitalize on opportunities and address vulnerabilities effectively.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTLE Analysis Section -->
+    <div class="section" id="pestle">
+      <div class="analysis-header">
+        <h2>PESTLE Analysis</h2>
+        <span class="analysis-status">Waiting for input</span>
+      </div>
+      <div class="analysis-wrapper">
+        <div class="analysis-text">
+          <div class="analysis-content">
+            <p class="loading-placeholder">
+                PESTLE analysis is a framework used to evaluate external macro-environmental factors that can impact an organization. It examines six dimensions: Political, Economic, Social, Technological, Legal, and Environmental factors. By assessing these influences, businesses can anticipate risks, identify growth opportunities, and adapt their strategies accordingly. PESTLE analysis is especially useful for market research, strategic planning, and risk management, helping organizations navigate complex external conditions and stay competitive in an evolving landscape.
+            </p>
+          </div>
+        </div>
+        <div class="analysis-images">
+          <p class="image-placeholder">
+            PESTLE analysis is a framework used to evaluate external macro-environmental factors that can impact an organization. It examines six dimensions: Political, Economic, Social, Technological, Legal, and Environmental factors. By assessing these influences, businesses can anticipate risks, identify growth opportunities, and adapt their strategies accordingly. PESTLE analysis is especially useful for market research, strategic planning, and risk management, helping organizations navigate complex external conditions and stay competitive in an evolving landscape.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sentiment Analysis Section -->
+    <div class="section" id="sentiment">
+      <div class="analysis-header">
+        <h2>Sentiment Analysis</h2>
+        <span class="analysis-status">Waiting for input</span>
+      </div>
+      <div class="analysis-wrapper">
+        <div class="analysis-text">
+          <div class="analysis-content">
+            <p class="loading-placeholder">
+                Sentiment analysis, also known as opinion mining, is a natural language processing (NLP) technique that determines the emotional tone of text. It categorizes opinions as positive, negative, or neutral, providing insights into customer sentiment, brand perception, and market trends. Businesses use sentiment analysis to monitor social media, product reviews, and customer feedback to enhance decision-making and improve customer experience. Advanced sentiment analysis techniques leverage machine learning and deep learning models to capture nuanced emotions and contextual meanings, making it a powerful tool for reputation management and business intelligence.
+            </p>
+          </div>
+        </div>
+        <div class="analysis-images">
+          <p class="image-placeholder">
+            Word clouds can visually highlight key themes in an annual report by identifying frequently used terms in sections such as the CEO’s letter, management discussion, and risk factors.
+            <br><br>
+            Sentiment level helps quantify the tone of an annual report, providing insights into management’s confidence and outlook.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Analysis Section -->
+    <div class="section" id="additional">
+      <div class="analysis-header">
+        <h2>Additional Analysis</h2>
+        <span class="analysis-status">Waiting for input</span>
+      </div>
+      <div class="analysis-wrapper">
+        <div class="analysis-text">
+          <div class="analysis-content">
+            <p class="loading-placeholder">
+                Any additional analyses requested beyond standard frameworks will appear here, including specialized financial analysis, market research, competitor analysis, or other custom analyses.
+            </p>
+          </div>
+        </div>
+        <div class="analysis-images">
+          <p class="image-placeholder">
+            Any additional analyses requested beyond standard frameworks will appear here, including specialized financial analysis, market research, competitor analysis, or other custom analyses.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Container for Watson Assistant Chat remains unchanged -->
+  <div id="watson-chat"></div>
+  <script>
+    window.watsonAssistantChatOptions = {
+      integrationID: "877e1e9e-e17e-49d2-bf81-1b455a4e7ec2",
+      region: "eu-gb",
+      serviceInstanceID: "a67b8127-fcef-4389-acf3-5763e81017f8",
+      onLoad: function(instance) {
+        window.g_wa_instance = instance;
+        instance.on({
+          type: "customResponse",
+          handler: (event, instance) => {
+            if (
+              event.data.message.user_defined &&
+              event.data.message.user_defined.user_defined_type === "user-file-upload"
+            ) {
+              fileUploadCustomResponseHandler(event, instance);
+            }
+          },
+        });
+        instance.render();
+      },
+      openChatByDefault: true,
+    };
+
+    setTimeout(function(){
+      const t = document.createElement('script');
+      t.src = "https://web-chat.global.assistant.watson.appdomain.cloud/loadWatsonAssistantChat.js";
+      document.head.appendChild(t);
+    });
+  </script>
+  <script src="main.js"></script>
+</body>
+</html>
