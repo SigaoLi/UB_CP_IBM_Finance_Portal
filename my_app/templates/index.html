@@ -20,6 +20,7 @@
     .header {
       display: flex;
       align-items: center;
+      margin-top: -3rem;
       margin-bottom: -3rem;
     }
 
@@ -47,7 +48,8 @@
       margin-right: 2rem; /* Increase right margin */
       font-family: 'IBM Plex Sans', sans-serif;
       white-space: pre-wrap;
-      font-size: 1.25rem; /* Larger font size */
+      line-height: 1.25;
+      font-size: 1.5rem; /* Larger font size */
       color: #000;       /* Black font color */
     }
 
@@ -61,10 +63,12 @@
     body {
       font-family: 'IBM Plex Sans', sans-serif;
       line-height: 1.5;
+      font-size: 1.125rem; /* increase text size */
       color: var(--ibm-gray-100);
       background-color: var(--ibm-gray-10);
       padding: 2rem;
     }
+
 
     /* Container occupies 60% of the width and aligns left */
     .container {
@@ -246,6 +250,19 @@
         border-top: 1px solid var(--ibm-gray-20);
         padding-top: 1rem;
       }
+
+      footer {
+            background-color: #333;
+            color: #ffffff;
+            text-align: center;
+            padding: 1rem;
+            width: 100%;
+      }
+
+      footer p {
+          color: white !important;
+          margin: 0;
+      }
     }
   </style>
 </head>
@@ -412,5 +429,9 @@
     });
   </script>
   <script src="main.js"></script>
+
+    <footer>
+      <p>&copy;2025 IBM Financial Analysis Assistant</p>
+    </footer>
 </body>
 </html>

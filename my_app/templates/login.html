@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Analysis Assistant - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ibm-blue: #0f62fe;
+            --ibm-blue-light: #d0e2ff;
+            --ibm-gray-10: #f4f4f4;
+            --ibm-gray-20: #e0e0e0;
+            --ibm-gray-100: #161616;
+            --ibm-white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            line-height: 1.5;
+            color: var(--ibm-gray-100);
+            background-color: var(--ibm-gray-10);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--ibm-white);
+            border-bottom: 2px solid #ccc;
+            position: relative;
+            padding: 1rem;
+        }
+        .navbar img {
+            height: 50px;
+            position: absolute;
+            left: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-form {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 2rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: var(--ibm-white);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--ibm-blue);
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .login-form input {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid var(--ibm-gray-20);
+            border-radius: 4px;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+        
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--ibm-blue);
+            box-shadow: 0 0 0 3px var(--ibm-blue-light);
+        }
+        
+        .login-form button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--ibm-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            font-family: 'IBM Plex Sans', sans-serif;
+            transition: background-color 0.2s;
+        }
+        
+        .login-form button:hover {
+            background-color: #0353e9;
+        }
+
+        .error-message {
+            color: #e62325;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .ibm-logo {
+            height: 36px;
+            margin-right: 1.5rem;
+        }
+
+        footer {
+            background-color: #333;
+            color: #ffffff;
+            text-align: center;
+            padding: 1rem;
+            width: 100%;
+        }
+
+        footer p {
+            color: white !important;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <img src="static/images/ibm-logo.webp" alt="IBM Logo" class="ibm-logo">
+        <h1>Financial Analysis Assistant</h1>
+    </div>
+
+    <div class="main-content">
+        <div class="login-form">
+            <h2>Login</h2>
+            {% if error %}
+            <div class="error-message">{{ error }}</div>
+            {% endif %}
+            <form id="loginForm" action="{{ url_for('login') }}" method="post">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy;2025 IBM Financial Analysis Assistant</p>
+    </footer>
+</body>
+</html>

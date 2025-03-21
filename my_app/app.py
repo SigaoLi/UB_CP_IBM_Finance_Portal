@@ -1,8 +1,11 @@
 # Flask and API-related imports
 from flask import Flask, request, jsonify, render_template, make_response
+from flask import session, redirect, url_for, flash
 from flask_cors import CORS
 import requests
 import subprocess
+import secrets
+from functools import wraps
 
 # IBM Watson imports
 from ibm_watson import AssistantV1
@@ -62,6 +65,10 @@ if not os.path.exists(LLM_LOGS_DIR):
 # Create Flask app with correct template and static folders
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB limit
+
+# Add session configuration
+app.secret_key = secrets.token_hex(16)  # Generate a secure secret key
+app.config['SESSION_TYPE'] = 'filesystem'
 
 # Simplified CORS configuration
 CORS(app)
@@ -567,16 +574,6 @@ def parse_most_analysis(input_text):
     return parsed_data
 
 def create_most_figure(most_data):
-    """
-    Create a composite figure illustrating the MOST analysis categories as horizontal slices.
-    
-    Each slice (Tactics, Strategy, Objectives, Mission) is represented by:
-      - A left-hand polygonal background.
-      - A right-hand area where a fixed-width color block appears on the left,
-        with the descriptive text to its right.
-    
-    Horizontal separator lines are added between text sections.
-    """
     # Local helper functions to define the boundaries of the left and right edges.
     def boundary_left(y):
         return (0.5 / 4.0) * y
@@ -1506,6 +1503,110 @@ def run_additional_analysis(retriever_or_text, conversation_text, analysis_type)
     additional_prompt = additional_prompt_template.format(analysis_type=analysis_type)
     return rag_chain(additional_prompt, retriever_or_text, interaction_type="additional_analysis")
 
+# File to store user credentials
+CONFIG_DIR = './config'
+if not os.path.exists(CONFIG_DIR):
+    os.makedirs(CONFIG_DIR)
+
+# Then update your users file path
+USERS_FILE = os.path.join(CONFIG_DIR, 'users.json')
+
+def hash_password(password):
+    """Create a SHA-256 hash of the password"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def initialize_users_file():
+    """Create the users file with a default user if it doesn't exist"""
+    if not os.path.exists(USERS_FILE):
+        default_users = {
+            "users": [
+                {
+                    "username": "abc",
+                    "password_hash": hash_password("123")
+                }
+            ]
+        }
+        
+        with open(USERS_FILE, 'w') as f:
+            json.dump(default_users, f, indent=2)
+        print(f"Created users file with default user")
+    else:
+        print(f"Users file already exists at {USERS_FILE}")
+
+def get_users():
+    """Read users from the file"""
+    try:
+        with open(USERS_FILE, 'r') as f:
+            return json.load(f).get('users', [])
+    except (FileNotFoundError, json.JSONDecodeError):
+        # If file doesn't exist or has invalid JSON, initialize it
+        initialize_users_file()
+        # Try again
+        with open(USERS_FILE, 'r') as f:
+            return json.load(f).get('users', [])
+
+def add_user(username, password):
+    """Add a new user to the file"""
+    users = get_users()
+    
+    # Check if user already exists
+    for user in users:
+        if user['username'] == username:
+            return False, "Username already exists"
+    
+    # Add new user
+    users.append({
+        "username": username,
+        "password_hash": hash_password(password)
+    })
+    
+    # Write back to file
+    with open(USERS_FILE, 'w') as f:
+        json.dump({"users": users}, f, indent=2)
+    
+    return True, "User added successfully"
+
+def verify_credentials(username, password):
+    """Check if username and password match a user in the file"""
+    users = get_users()
+    password_hash = hash_password(password)
+    
+    for user in users:
+        if user['username'] == username and user['password_hash'] == password_hash:
+            return True
+    
+    return False
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in'):
+            return jsonify({"success": False, "msg": "Authentication required"}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        # Check credentials against users file
+        if verify_credentials(username, password):
+            session['logged_in'] = True
+            session['username'] = username
+            return redirect(url_for('index'))
+        else:
+            error = 'Invalid username or password'
+    
+    return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
 # Flask routes
 @app.route('/health')
 def health_check():
@@ -1678,6 +1779,7 @@ def analyze_additional():
     return jsonify({"msg": result, "analysis_type": "additional", "success": True, "mmr_used": USE_MMR})
 
 @app.route('/upload', methods=["POST", "OPTIONS"])
+@login_required
 def upload_file():
     if request.method == "OPTIONS":
         return "", 204
@@ -1708,6 +1810,8 @@ def upload_file():
 
 @app.route('/')
 def index():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     return render_template("index.html")
 
 @app.route('/main.js')
@@ -1715,6 +1819,9 @@ def serve_js():
     return app.send_static_file('main.js')
 
 if __name__ == '__main__':
+    # Initialize the users file with default credentials
+    initialize_users_file()
+    
     # Clear the Chroma database to resolve dimension mismatch
     clear_chroma_db()
     
