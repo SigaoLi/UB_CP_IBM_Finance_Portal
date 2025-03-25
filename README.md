@@ -11,7 +11,7 @@ Our platform provides AI-powered analysis of company annual reports, offering in
 ✨ The IBM Financial Analysis Assistant accepts user input queries at two distinct levels ✨
 
 **Design-based analysis**
-<br/> Users submit company annual reports without a specific idea in mind. The system analyzes the provided references to generate built-in analysis and produce visualizations.
+<br/> Users submit company annual reports without a specific idea in mind. The system analyzes the provided report to generate built-in analysis and produce visualizations.
 
 **Detailed Idea Description**
 <br/> Users provide comprehensive descriptions of their specific research ideas. The system processes these detailed inputs to develop implementation strategies based on the user's explicit requirements.
